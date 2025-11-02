@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function Patient() {
+	const navigate = useNavigate();
 	const [isRegistered, setIsRegistered] = useState(null);
+	const [email, setEmail] = useState();
+	const [password, setPassword] = useState();
 	const [formData, setFormData] = useState({
 		name: "",
 		gender: "",
@@ -17,9 +21,32 @@ export default function Patient() {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		alert("Form submitted successfully!");
+		const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+		if (isRegistered) {
+			const response = await fetch(`${BACKEND_URL}/login/patient`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ email, password }),
+			});
+			if (response.status == 200) {
+				navigate("/dashboard");
+			}
+		} else {
+			const response = await fetch(`${BACKEND_URL}/register/patient`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(formData),
+			});
+			if (response.status == 200) {
+				navigate("/dashboard");
+			}
+		}
 	};
 
 	return (
@@ -46,18 +73,25 @@ export default function Patient() {
 			{isRegistered === true && (
 				<div className="mt-8 bg-white p-6 rounded-2xl shadow-md w-full max-w-md">
 					<h3 className="text-lg font-semibold mb-4">Login</h3>
-					<form>
+					<form onSubmit={handleSubmit}>
 						<input
 							type="email"
+							value={email}
 							placeholder="Email"
 							className="w-full p-2 border rounded mb-3"
+							onChange={(e) => setEmail(e.target.value)}
 						/>
 						<input
 							type="password"
+							value={password}
 							placeholder="Password"
 							className="w-full p-2 border rounded mb-3"
+							onChange={(e) => setPassword(e.target.value)}
 						/>
-						<button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+						<button
+							type="submit"
+							className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+						>
 							Login
 						</button>
 					</form>
