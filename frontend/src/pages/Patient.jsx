@@ -15,6 +15,7 @@ export default function Patient() {
 		address: "",
 		dob: "",
 		email: "",
+		password: ""
 	});
 
 	const handleChange = (e) => {

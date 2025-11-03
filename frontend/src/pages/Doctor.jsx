@@ -13,6 +13,8 @@ export default function Doctor() {
 		licenseNo: "",
 		deptId: "",
 		email: "",
+		gender: "",
+		password: "",
 	});
 
 	const handleChange = (e) => {
@@ -123,6 +125,16 @@ export default function Doctor() {
 							/>
 						</div>
 						<div>
+							<label className="block mb-1">Gender</label>
+							<input
+								name="gender"
+								value={formData.gender}
+								onChange={handleChange}
+								className="w-full border p-2 rounded"
+								required
+							/>
+						</div>
+						<div>
 							<label className="block mb-1">Specialization</label>
 							<input
 								name="specialization"
@@ -158,6 +170,17 @@ export default function Doctor() {
 								name="email"
 								type="email"
 								value={formData.email}
+								onChange={handleChange}
+								className="w-full border p-2 rounded"
+								required
+							/>
+						</div>
+						<div>
+							<label className="block mb-1">Password</label>
+							<input
+								name="password"
+								type="password"
+								value={formData.password}
 								onChange={handleChange}
 								className="w-full border p-2 rounded"
 								required
