@@ -32,7 +32,9 @@ export default function Doctor() {
 				},
 				body: JSON.stringify({ email, password }),
 			});
+			const data = await response.json();
 			if (response.status == 200) {
+				localStorage.setItem("token", data.token);
 				navigate("/doctor-dash");
 			}
 		} else {
@@ -43,7 +45,9 @@ export default function Doctor() {
 				},
 				body: JSON.stringify(formData),
 			});
+			const data = await response.json();
 			if (response.ok) {
+				localStorage.setItem("token", data.token);
 				navigate("/doctor-dash");
 			}
 		}

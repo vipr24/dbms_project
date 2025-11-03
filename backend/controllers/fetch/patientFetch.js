@@ -2,7 +2,7 @@ import { sql } from "../../config/dbConfig.js";
 
 const patientFetch = async (req, res) => {
 	try {
-		const patientId = req.user.id; // from JWT
+		const patientId = req.user.patient_id; // from JWT
 
 		// patient info
 		const patient = await sql`

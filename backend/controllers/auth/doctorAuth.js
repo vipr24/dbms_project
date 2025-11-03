@@ -44,7 +44,6 @@ export const loginDoctor = async (req, res) => {
 
 		const user = userRes[0];
 		const validPassword = await bcrypt.compare(password, user.password);
-		// const validPassword = password === user.password; // ⚠️ Only for testing
 		if (!validPassword)
 			return res.status(401).json({ message: "Invalid password" });
 
