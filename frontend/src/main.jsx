@@ -5,7 +5,8 @@ import App from "./App.jsx";
 import { BrowserRouter, Routes, Route } from "react-router";
 import Doctor from "./pages/Doctor.jsx";
 import Patient from "./pages/Patient.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
+import DoctorDash from "./pages/DoctorDash.jsx";
+import PatientDash from "./pages/PatientDash.jsx";
 
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
@@ -14,7 +15,8 @@ createRoot(document.getElementById("root")).render(
 				<Route path="/" element={<App />} />
 				<Route path="/doctor" element={<Doctor />} />
 				<Route path="/patient" element={<Patient />} />
-				<Route path="/dashboard" element={<Dashboard />} />
+				<Route path="/doctor-dash" element={<DoctorDash />} />
+				<Route path="/patient-dash" element={<PatientDash />} />
 			</Routes>
 		</BrowserRouter>
 	</StrictMode>

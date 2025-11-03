@@ -34,7 +34,7 @@ export default function Patient() {
 				body: JSON.stringify({ email, password }),
 			});
 			if (response.status == 200) {
-				navigate("/dashboard");
+				navigate("/patient-dash");
 			}
 		} else {
 			const response = await fetch(`${BACKEND_URL}/register/patient`, {
