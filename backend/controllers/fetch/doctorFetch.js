@@ -1,6 +1,6 @@
-import { sql } from "../../config/dbConfig";
+import { sql } from "../../config/dbConfig.js";
 
-export default doctorFetch = async (req, res) => {
+const doctorFetch = async (req, res) => {
 	try {
 		const doctorId = req.user.id; // from JWT (set by verifyToken middleware)
 
@@ -28,3 +28,5 @@ export default doctorFetch = async (req, res) => {
 		res.status(500).json({ error: "Server error" });
 	}
 };
+
+export default doctorFetch;

@@ -1,6 +1,6 @@
-import { sql } from "../../config/dbConfig";
+import { sql } from "../../config/dbConfig.js";
 
-export default patientFetch = async (req, res) => {
+const patientFetch = async (req, res) => {
 	try {
 		const patientId = req.user.id; // from JWT
 
@@ -37,3 +37,5 @@ export default patientFetch = async (req, res) => {
 		res.status(500).json({ error: "Server error" });
 	}
 };
+
+export default patientFetch;
