@@ -1,77 +1,83 @@
+-- ==============================
+-- INSERT SAMPLE DATA
+-- ==============================
 
--- 1. DEPARTMENT
+-- 1️⃣ DEPARTMENT
 INSERT INTO Department (Dept_ID, Dept_Name, Location)
 VALUES
-(1, 'Cardiology', 'Block A'),
-(2, 'Pathology', 'Block B');
+(3, 'Neurology', 'Block C'),
+(4, 'Radiology', 'Block D'),
+(5, 'Orthopedics', 'Block E');
 
--- 2. DOCTOR
-INSERT INTO Doctor (Doctor_ID, Name, Gender, Phone_No, Email, License_Number, Specialization, Dept_ID)
+-- 2️⃣ DOCTOR
+INSERT INTO Doctor (Name, Gender, Phone_No, Email, License_Number, Specialization, Dept_ID, Password)
 VALUES
-(101, 'Dr. Neha Verma', 'F', '9876543210', 'neha.verma@citycare.com', 'LIC12345', 'Cardiologist', 1),
-(102, 'Dr. Rohan Gupta', 'M', '9123456780', 'rohan.gupta@citycare.com', 'LIC67890', 'Pathologist', 2);
+('Dr. Kavita Rao', 'F', '9898989898', 'kavita.rao@citycare.com', 'LIC33333', 'Neurologist', 3, 'asm123'),
+('Dr. Arjun Mehta', 'M', '9123123123', 'arjun.mehta@citycare.com', 'LIC44444', 'Radiologist', 4, 'asm123'),
+('Dr. Pooja Nair', 'F', '9876701234', 'pooja.nair@citycare.com', 'LIC55555', 'Orthopedic Surgeon', 5, 'asm123');
 
--- 3. PATIENT
-INSERT INTO Patient (Patient_ID, Name, Gender, Contact_No, Blood_Group, Address, Email, Date_of_Birth, Registration_Date)
+-- 3️⃣ PATIENT
+INSERT INTO Patient (Name, Gender, Contact_No, Blood_Group, Address, Email, Date_of_Birth, Registration_Date, Password)
 VALUES
-(201, 'Aarav Sharma', 'M', '8885551212', 'B+', 'Delhi, India', 'aarav.sharma@email.com', '1995-04-22', '2025-11-01'),
-(202, 'Priya Mehta', 'F', '7774442323', 'O-', 'Mumbai, India', 'priya.mehta@email.com', '1998-06-15', '2025-11-01');
+('Riya Kapoor', 'F', '9000001122', 'A+', 'Kolkata, India', 'riya.kapoor@email.com', '1997-10-21', '2025-11-02', 'asm123'),
+('Ishaan Tiwari', 'M', '9111112233', 'O+', 'Bangalore, India', 'ishaan.tiwari@email.com', '1996-12-03', '2025-11-02', 'asm123');
 
--- 4. APPOINTMENT
+-- 4️⃣ APPOINTMENT
 INSERT INTO Appointment (Appoint_ID, Patient_ID, Date, Time)
 VALUES
-(301, 201, '2025-11-02', '10:00:00'),
-(302, 202, '2025-11-02', '11:30:00');
+(303, 1, '2025-11-03', '09:00:00'),
+(304, 2, '2025-11-03', '10:30:00');
 
--- 5. LAB TECHNICIAN
+-- 5️⃣ LAB TECHNICIAN
 INSERT INTO Lab_Technician (Tech_ID, Name, Contact_No, Dept)
 VALUES
-(401, 'Anjali Singh', '9991112222', 'Pathology'),
-(402, 'Raj Patel', '9993334444', 'Biochemistry');
+(403, 'Sneha Das', '9995556666', 'Radiology'),
+(404, 'Vikram Soni', '9997778888', 'Neurology');
 
--- 6. TEST PACKAGE
+-- 6️⃣ TEST PACKAGE
 INSERT INTO Test_Package (Package_ID, Package_Name, Description)
 VALUES
-(501, 'Basic Health Package', 'Includes CBC and Lipid Profile tests');
+(502, 'Heart Care Package', 'Includes ECG, Cholesterol, Blood Pressure'),
+(503, 'Advanced Neurology Package', 'Includes EEG, Brain MRI, Nerve Test');
 
--- 7. TEST
+-- 7️⃣ TEST
 INSERT INTO Test (Test_Code, Test_Name, Normal_Range, Test_Type, Tech_ID, Appoint_ID)
 VALUES
-(601, 'CBC (Complete Blood Count)', '4.5-5.5 million/μL', 'Blood', 401, 301),
-(602, 'Lipid Profile', '<200 mg/dL', 'Blood', 402, 302);
+(603, 'ECG (Electrocardiogram)', 'Normal Rhythm', 'Cardio', 403, 303),
+(604, 'EEG (Electroencephalogram)', 'Normal Brain Waves', 'Neuro', 404, 304);
 
--- 8. CONTAINS (Package-Test Mapping)
+-- 8️⃣ CONTAINS (Mapping Tests → Packages)
 INSERT INTO Contains (Test_Code, Package_ID)
 VALUES
-(601, 501),
-(602, 501);
+(603, 502),
+(604, 503);
 
--- 9. TEST RESULT
+-- 9️⃣ TEST RESULT
 INSERT INTO Test_Result (Test_ID, Test_Code, Measured_Value, Unit, Interpretation_Flag)
 VALUES
-(701, 601, '5.0', 'million/μL', 'Normal'),
-(702, 602, '210', 'mg/dL', 'High');
+(703, 603, 'Normal Rhythm', '', 'Normal'),
+(704, 604, 'Mild Abnormality', '', 'Needs Review');
 
--- 10. REPORTS
+-- 🔟 REPORTS
 INSERT INTO Reports (R_ID, Patient_ID, Result_ID, R_Date, Approval_Status)
 VALUES
-(801, 201, 701, '2025-11-03', 'Approved'),
-(802, 202, 702, '2025-11-03', 'Approved');
+(803, 1, 703, '2025-11-03', 'Approved'),
+(804, 2, 704, '2025-11-03', 'Pending');
 
--- 11. BILLING RECORDS
+-- 11️⃣ BILLING RECORDS
 INSERT INTO Billing_Records (Bill_No, R_ID, Amount, Payment_Status, Method_of_Payment)
 VALUES
-(901, 801, 1500.00, 'Paid', 'Credit Card'),
-(902, 802, 1800.00, 'Pending', 'UPI');
+(903, 803, 2200.00, 'Paid', 'UPI'),
+(904, 804, 3100.00, 'Pending', 'Cash');
 
--- 12. PATIENT HISTORY
+-- 12️⃣ PATIENT HISTORY
 INSERT INTO Patient_History (History_ID, Patient_ID, Visit_Date)
 VALUES
-(1001, 201, '2025-11-02'),
-(1002, 202, '2025-11-02');
+(1003, 1, '2025-11-03'),
+(1004, 2, '2025-11-03');
 
--- 13. PRESCRIPTION
+-- 13️⃣ PRESCRIPTION
 INSERT INTO Provide_Prescription (Prescription_ID, Doctor_ID, Patient_ID)
 VALUES
-(1101, 101, 201),
-(1102, 102, 202);
+(1103, 1, 1),
+(1104, 2, 2);

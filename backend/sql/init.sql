@@ -1,3 +1,17 @@
+DROP TABLE IF EXISTS Contains CASCADE;
+DROP TABLE IF EXISTS Provide_Prescription CASCADE;
+DROP TABLE IF EXISTS Patient_History CASCADE;
+DROP TABLE IF EXISTS Billing_Records CASCADE;
+DROP TABLE IF EXISTS Reports CASCADE;
+DROP TABLE IF EXISTS Test_Result CASCADE;
+DROP TABLE IF EXISTS Test CASCADE;
+DROP TABLE IF EXISTS Test_Package CASCADE;
+DROP TABLE IF EXISTS Lab_Technician CASCADE;
+DROP TABLE IF EXISTS Appointment CASCADE;
+DROP TABLE IF EXISTS Patient CASCADE;
+DROP TABLE IF EXISTS Doctor CASCADE;
+DROP TABLE IF EXISTS Department CASCADE;
+
 CREATE TABLE Department (
   Dept_ID     INT PRIMARY KEY,
   Dept_Name   VARCHAR(50),
@@ -5,26 +19,28 @@ CREATE TABLE Department (
 );
 
 CREATE TABLE Doctor (
-  Doctor_ID      INT PRIMARY KEY,
+  Doctor_ID      SERIAL PRIMARY KEY,
   Name           VARCHAR(50),
   Gender         CHAR(1),
   Phone_No       VARCHAR(15),
-  Email          VARCHAR(100),
+  Email          VARCHAR(100) UNIQUE NOT NULL,
   License_Number VARCHAR(30),
   Specialization VARCHAR(50),
   Dept_ID        INT,
+  Password       VARCHAR(50) NOT NULL,
   FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
 );
 
 CREATE TABLE Patient(
-  Patient_ID        INT PRIMARY KEY,
+  Patient_ID        SERIAL PRIMARY KEY,
   Name              VARCHAR(50),
   Gender            CHAR(1),
   Contact_No        VARCHAR(15),
   Blood_Group       VARCHAR(5),
   Address           VARCHAR(255),
-  Email             VARCHAR(100),
+  Email             VARCHAR(100) UNIQUE NOT NULL,
   Date_of_Birth     DATE,
+  Password          VARCHAR(50) NOT NULL,
   Registration_Date DATE
 );
 
