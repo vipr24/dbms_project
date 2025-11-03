@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function PatientDashboard() {
 	const [patient, setPatient] = useState(null);
@@ -18,6 +19,7 @@ export default function PatientDashboard() {
 	});
 
 	const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const token = localStorage.getItem("token");
@@ -87,10 +89,24 @@ export default function PatientDashboard() {
 		alert(data.message || data.error);
 	};
 
+	if (!patient)
+		return (
+			<p className="text-center mt-10 text-gray-600">Please login...</p>
+		);
+
 	return (
 		<div className="p-8 bg-gray-50 min-h-screen">
-			<h1 className="text-3xl font-bold mb-6 text-center text-blue-700">
+			<h1 className="text-3xl font-bold mb-6 text-center text-blue-700 w-[96vw] flex justify-between">
 				Patient Dashboard
+				<button
+					onClick={() => {
+						localStorage.removeItem("token");
+						navigate("/");
+					}}
+					className="p-2 bg-red-500 text-xl text-red-300 rounded"
+				>
+					Logout
+				</button>
 			</h1>
 
 			{/* Patient Info */}
