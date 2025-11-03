@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 
 export default function generateToken(user) {
-	return jwt.sign(
-		{ id: user.id, email: user.email, role: user.role },
-		process.env.JWT_SECRET,
-		{ expiresIn: "2h" }
-	);
+	const id = user.doctor_id || user.patient_id;
+	return jwt.sign({ id, email: user.email }, process.env.JWT_SECRET, {
+		expiresIn: "2h",
+	});
 }

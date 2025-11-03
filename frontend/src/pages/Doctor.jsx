@@ -43,8 +43,8 @@ export default function Doctor() {
 				},
 				body: JSON.stringify(formData),
 			});
-			if (response.status == 200) {
-				navigate("/dashboard");
+			if (response.ok) {
+				navigate("/doctor-dash");
 			}
 		}
 	};

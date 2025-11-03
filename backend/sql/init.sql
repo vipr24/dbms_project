@@ -27,7 +27,7 @@ CREATE TABLE Doctor (
   License_Number VARCHAR(30),
   Specialization VARCHAR(50),
   Dept_ID        INT,
-  Password       VARCHAR(50) NOT NULL,
+  Password       TEXT NOT NULL,
   FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE Patient(
   Address           VARCHAR(255),
   Email             VARCHAR(100) UNIQUE NOT NULL,
   Date_of_Birth     DATE,
-  Password          VARCHAR(50) NOT NULL,
+  Password          TEXT NOT NULL,
   Registration_Date DATE
 );
 

@@ -2,7 +2,7 @@ import { sql } from "../../config/dbConfig.js";
 
 const doctorFetch = async (req, res) => {
 	try {
-		const doctorId = req.user.id; // from JWT (set by verifyToken middleware)
+		const doctorId = req.user.doctor_id; // from JWT (set by verifyToken middleware)
 
 		const doctor = await sql`
 		SELECT d.doctor_id, d.name, d.gender, d.phone_no, d.email, d.specialization, dept.dept_name

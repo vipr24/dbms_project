@@ -23,7 +23,7 @@ app.post("/login/patient", loginPatient);
 app.post("/register/patient", registerPatient);
 
 app.get("/patient", verifyToken, patientFetch);
-app.post("/doctor", verifyToken, doctorFetch);
+app.get("/doctor", verifyToken, doctorFetch);
 
 app.listen(3000, () => {
 	console.log("server is running");

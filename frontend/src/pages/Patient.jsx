@@ -44,8 +44,8 @@ export default function Patient() {
 				},
 				body: JSON.stringify(formData),
 			});
-			if (response.status == 200) {
-				navigate("/dashboard");
+			if (response.ok) {
+				navigate("/patient-dash");
 			}
 		}
 	};
