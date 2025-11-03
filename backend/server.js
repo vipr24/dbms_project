@@ -11,6 +11,7 @@ import patientFetch from "./controllers/fetch/patientFetch.js";
 import { appointmentBook } from "./controllers/patientRequests/appointmentBook.js";
 import { testRegister } from "./controllers/patientRequests/testRegister.js";
 import { sql } from "./config/dbConfig.js";
+import { doctorPatientDetails } from "./controllers/doctorRequests/doctorPatientDetails.js";
 
 const app = express();
 app.use(express.json());
@@ -44,6 +45,8 @@ app.get("/tests", async (req, res) => {
 		await sql`SELECT test_code, test_name, test_type, normal_range FROM test;`;
 	res.json(tests);
 });
+
+app.get("/doctor/patient/:patient_id", verifyToken, doctorPatientDetails);
 
 app.listen(3000, () => {
 	console.log("server is running");
