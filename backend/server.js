@@ -8,6 +8,9 @@ import {
 import cors from "cors";
 import doctorFetch from "./controllers/fetch/doctorFetch.js";
 import patientFetch from "./controllers/fetch/patientFetch.js";
+import { appointmentBook } from "./controllers/patientRequests/appointmentBook.js";
+import { testRegister } from "./controllers/patientRequests/testRegister.js";
+import { sql } from "./config/dbConfig.js";
 
 const app = express();
 app.use(express.json());
@@ -24,6 +27,23 @@ app.post("/register/patient", registerPatient);
 
 app.get("/patient", verifyToken, patientFetch);
 app.get("/doctor", verifyToken, doctorFetch);
+
+app.post("/appointment/book", verifyToken, appointmentBook);
+app.post("/test/register", verifyToken, testRegister);
+
+// Fetch all doctors
+app.get("/doctors", async (req, res) => {
+	const doctors =
+		await sql`SELECT doctor_id, name, specialization FROM doctor;`;
+	res.json(doctors);
+});
+
+// Fetch all available tests
+app.get("/tests", async (req, res) => {
+	const tests =
+		await sql`SELECT test_code, test_name, test_type, normal_range FROM test;`;
+	res.json(tests);
+});
 
 app.listen(3000, () => {
 	console.log("server is running");
