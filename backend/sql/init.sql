@@ -47,7 +47,6 @@ CREATE TABLE Patient(
 CREATE TABLE Appointment (
   Appoint_ID  INT PRIMARY KEY,
   Patient_ID  INT,
-  Doctor_ID   INT REFERENCES Doctor(Doctor_ID);, 
   Date        DATE,
   Time        TIME,
   FOREIGN KEY (Patient_ID) REFERENCES Patient(Patient_ID)
