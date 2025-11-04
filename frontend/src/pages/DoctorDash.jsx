@@ -49,7 +49,7 @@ export default function DoctorDashboard() {
 	};
 
 	if (!doctor)
-		return <p className="text-center mt-10 text-gray-600">Loading...</p>;
+		return <p className="text-center mt-10 text-gray-600">Please login...</p>;
 
 	return (
 		<div className="p-8 bg-gray-50 min-h-screen">

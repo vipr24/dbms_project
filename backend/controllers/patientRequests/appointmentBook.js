@@ -2,7 +2,7 @@ import { sql } from "../../config/dbConfig.js";
 
 export const appointmentBook = async (req, res) => {
 	try {
-		const { doctorId, date, time } = req.body;
+		const { doctorId, patient_id, date, time } = req.body;
 		const patientId = req.user.patient_id;
 
 		if (!doctorId || !date || !time) {
@@ -18,6 +18,11 @@ export const appointmentBook = async (req, res) => {
 			INSERT INTO appointment (appoint_id, patient_id, date, time)
 			VALUES (${appointId}, ${patientId}, ${date}, ${time});
 		`;
+
+		await sql`INSERT INTO provide_prescription (prescription_id, doctor_id, patient_id)
+		VALUES (COALESCE((SELECT MAX(prescription_id) + 1 FROM provide_prescription), 1), 
+		${doctorId}, 
+		${patientId})`;
 
 		// optional: Add entry to Patient_History
 		await sql`
