@@ -122,7 +122,7 @@ export default function PatientDashboard() {
 						<b>Gender:</b> {patient.gender}
 					</p>
 					<p>
-						<b>Phone:</b> {patient.phone_no}
+						<b>Phone:</b> {patient.contact_no}
 					</p>
 					<p>
 						<b>Email:</b> {patient.email}
