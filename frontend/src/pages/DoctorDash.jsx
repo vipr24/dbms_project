@@ -7,7 +7,7 @@ export default function DoctorDashboard() {
 	const [selectedPatient, setSelectedPatient] = useState(null);
 	const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 	const navigate = useNavigate();
-
+	//for authentication
 	useEffect(() => {
 		const token = localStorage.getItem("token");
 		fetch(`${BACKEND_URL}/doctor`, {

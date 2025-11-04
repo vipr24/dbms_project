@@ -44,7 +44,7 @@ export const testRegister = async (req, res) => {
 		}, ${testType}, ${techId}, ${appointId});
 		`;
 
-		// Create default Test_Result (empty, until lab updates)
+		// Creating default Test_Result (empty, until lab updates)
 		const nextTestId =
 			await sql`SELECT COALESCE(MAX(test_id), 700) + 1 AS next_id FROM test_result;`;
 		await sql`

@@ -47,7 +47,7 @@ export default function PatientDashboard() {
 			.then((data) => setAvailableTests(data));
 	}, []);
 
-	// --- Handlers ---
+	//Handlers
 	const handleAppointmentSubmit = async (e) => {
 		e.preventDefault();
 		const token = localStorage.getItem("token");
