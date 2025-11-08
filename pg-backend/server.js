@@ -11,7 +11,6 @@ import doctorFetch from "./controllers/fetch/doctorFetch.js";
 import patientFetch from "./controllers/fetch/patientFetch.js";
 import { appointmentBook } from "./controllers/patientRequests/appointmentBook.js";
 import { testRegister } from "./controllers/patientRequests/testRegister.js";
-import { sql } from "./config/dbConfig.js";
 import { doctorPatientDetails } from "./controllers/doctorRequests/doctorPatientDetails.js";
 
 const app = express();
@@ -36,8 +35,8 @@ app.post("/test/register", verifyToken, testRegister);
 // Fetch all doctors
 app.get("/doctors", async (req, res) => {
 	const doctors =
-		await sql`SELECT doctor_id, name, specialization FROM doctor;`;
-	res.json(doctors);
+		await pool.query(`SELECT doctor_id, name, specialization FROM doctor;`);
+	res.json(doctors.rows);
 });
 
 // Fetch all available tests
@@ -45,7 +44,7 @@ app.get("/tests", async (req, res) => {
 	const tests = await pool.query(
 		`SELECT test_code, test_name, test_type, normal_range FROM test;`
 	);
-	res.json(tests);
+	res.json(tests.rows);
 });
 
 app.get("/doctor/patient/:patient_id", verifyToken, doctorPatientDetails);

@@ -63,6 +63,7 @@ CREATE TABLE Appointment (
   Doctor_ID INT NOT NULL,
   Date        DATE NOT NULL,
   Time        TIME NOT NULL,
+  UNIQUE (doctor_id, date, time),
   FOREIGN KEY (Patient_ID) REFERENCES Patient(Patient_ID)
   FOREIGN KEY (Doctor_ID) REFERENCES Doctor(Doctor_ID)
 );
