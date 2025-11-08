@@ -50,8 +50,8 @@ export const loginDoctor = async (req, res) => {
 
 	try {
 		const userRes = await pool.query(
-			"SELECT * FROM Doctor WHERE Email = ${1}",
-			email
+			"SELECT * FROM Doctor WHERE Email = ${1} RETURNING *",
+			[email]
 		);
 		if (userRes.length === 0)
 			return res.status(401).json({ message: "Invalid credentials" });

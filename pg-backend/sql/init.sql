@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS Department CASCADE;
 
 CREATE TABLE Department (
   Dept_ID     INT PRIMARY KEY,
-  Dept_Name   VARCHAR(50),
+  Dept_Name   VARCHAR(50) NOT NULL,
   Location    VARCHAR(50)
 );
 
@@ -33,11 +33,11 @@ VALUES
 
 CREATE TABLE Doctor (
   Doctor_ID      SERIAL PRIMARY KEY,
-  Name           VARCHAR(50),
+  Name           VARCHAR(50) NOT NULL,
   Gender         CHAR(1),
   Phone_No       VARCHAR(15),
   Email          VARCHAR(100) UNIQUE NOT NULL,
-  License_Number VARCHAR(30),
+  License_Number VARCHAR(30) NOT NULL,
   Specialization VARCHAR(50),
   Dept_ID        INT,
   Password       TEXT NOT NULL,
@@ -46,23 +46,25 @@ CREATE TABLE Doctor (
 
 CREATE TABLE Patient(
   Patient_ID        SERIAL PRIMARY KEY,
-  Name              VARCHAR(50),
-  Gender            CHAR(1),
-  Contact_No        VARCHAR(15),
-  Blood_Group       VARCHAR(5),
-  Address           VARCHAR(255),
+  Name              VARCHAR(50) NOT NULL,
+  Gender            ENUM('M', 'F', 'Others'),
+  Contact_No        VARCHAR(15) NOT NULL,
+  Blood_Group       VARCHAR(5) NOT NULL,
+  Address           VARCHAR(255) NOT NULL,
   Email             VARCHAR(100) UNIQUE NOT NULL,
-  Date_of_Birth     DATE,
+  Date_of_Birth     DATE NOT NULL,
   Password          TEXT NOT NULL,
-  Registration_Date DATE
+  Registration_Date DATE DEFAULT (CURRENT_DATE)
 );
 
 CREATE TABLE Appointment (
-  Appoint_ID  INT PRIMARY KEY,
-  Patient_ID  INT,
-  Date        DATE,
-  Time        TIME,
+  Appoint_ID  SERIAL PRIMARY KEY,
+  Patient_ID  INT NOT NULL,
+  Doctor_ID INT NOT NULL,
+  Date        DATE NOT NULL,
+  Time        TIME NOT NULL,
   FOREIGN KEY (Patient_ID) REFERENCES Patient(Patient_ID)
+  FOREIGN KEY (Doctor_ID) REFERENCES Doctor(Doctor_ID)
 );
 
 CREATE TABLE Lab_Technician (

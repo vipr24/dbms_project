@@ -19,19 +19,25 @@ export const registerPatient = async (req, res) => {
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		const result = await pool.query(
-			"INSERT INTO Patient (Name, Email, Password, Contact_No, Gender, Blood_Group, Registration_Date, Date_of_Birth, Address) VALUES (${1}, ${2}, ${3}, ${4}, ${5}, ${6}, ${7}, ${8}, ${9})",
-			name,
-			email,
-			hashedPassword,
-			phone,
-			gender,
-			bloodGroup,
-			dateOfRegistration,
-			dob,
-			address
+			`INSERT INTO Patient 
+  (Name, Email, Password, Contact_No, Gender, Blood_Group, Registration_Date, Date_of_Birth, Address)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  RETURNING *`,
+			[
+				name,
+				email,
+				hashedPassword,
+				phone,
+				gender,
+				bloodGroup,
+				dateOfRegistration,
+				dob,
+				address,
+			]
 		);
 
-		const token = generateToken(result[0]);
+		const token = generateToken(result.rows[0]);
+
 		res.status(201).json({
 			message: "Patient registered successfully",
 			token,
@@ -48,8 +54,8 @@ export const loginPatient = async (req, res) => {
 
 	try {
 		const userRes = await pool.query(
-			"SELECT * FROM Patient WHERE Email = ${1}",
-			email
+			"SELECT * FROM Patient WHERE Email = $1",
+			[email]
 		);
 		if (userRes.length === 0)
 			return res.status(401).json({ message: "Invalid credentials" });
