@@ -50,7 +50,7 @@ export const loginDoctor = async (req, res) => {
 
 	try {
 		const userRes = await pool.query(
-			"SELECT * FROM Doctor WHERE Email = ${1} RETURNING *",
+			"SELECT * FROM Doctor WHERE Email = $1",
 			[email]
 		);
 		if (userRes.length === 0)

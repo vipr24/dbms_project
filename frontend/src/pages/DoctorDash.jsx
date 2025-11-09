@@ -5,51 +5,77 @@ export default function DoctorDashboard() {
 	const [doctor, setDoctor] = useState(null);
 	const [patients, setPatients] = useState([]);
 	const [selectedPatient, setSelectedPatient] = useState(null);
+	const [appointments, setAppointments] = useState([]);
+	const [availableTests, setAvailableTests] = useState([]);
+	const [selectedTests, setSelectedTests] = useState([]);
+	const [modalOpen, setModalOpen] = useState(false);
+	const [selectedAppointment, setSelectedAppointment] = useState(null);
+
 	const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		const token = localStorage.getItem("token");
-		fetch(`${BACKEND_URL}/doctor`, {
+		if (!token) return;
+
+		// Fetch doctor info + assigned patients via appointments
+		fetch(`${BACKEND_URL}/doctor/dashboard`, {
 			headers: { Authorization: `Bearer ${token}` },
 		})
 			.then((res) => res.json())
 			.then((data) => {
 				setDoctor(data.doctor);
 				setPatients(data.patients || []);
+				setAppointments(data.appointments || []);
 			})
 			.catch((err) =>
 				console.error("Error fetching doctor dashboard:", err)
 			);
+
+		// Fetch available tests
+		fetch(`${BACKEND_URL}/tests`)
+			.then((res) => res.json())
+			.then((data) => setAvailableTests(data))
+			.catch((err) => console.error("Error fetching tests:", err));
 	}, []);
 
-	const togglePatientDetails = async (patientId) => {
-		if (selectedPatient?.patient_id === patientId) {
-			setSelectedPatient(null); // close if same patient clicked again
-			return;
-		}
+	// Open modal to request tests for a specific appointment
+	const handleRequestTests = (patient, appointment) => {
+		setSelectedPatient(patient);
+		setSelectedAppointment(appointment);
+		setSelectedTests([]);
+		setModalOpen(true);
+	};
+
+	const submitTestRequest = async () => {
+		const token = localStorage.getItem("token");
+		if (!selectedAppointment || selectedTests.length === 0) return;
 
 		try {
-			const token = localStorage.getItem("token");
-			const res = await fetch(
-				`${BACKEND_URL}/doctor/patient/${patientId}`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				}
-			);
-			const data = await res.json();
-			setSelectedPatient({
-				...data.patient,
-				tests: data.tests || [],
-				prescriptions: data.prescriptions || [],
+			const res = await fetch(`${BACKEND_URL}/test/request`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					appointId: selectedAppointment.appoint_id,
+					tests: selectedTests, // array of test_code
+				}),
 			});
+
+			const data = await res.json();
+			alert(data.message || "Tests requested successfully");
+			setModalOpen(false);
 		} catch (err) {
-			console.error("Error fetching patient details:", err);
+			console.error("Error requesting tests:", err);
 		}
 	};
 
 	if (!doctor)
-		return <p className="text-center mt-10 text-gray-600">Please login...</p>;
+		return (
+			<p className="text-center mt-10 text-gray-600">Please login...</p>
+		);
 
 	return (
 		<div className="p-8 bg-gray-50 min-h-screen">
@@ -66,28 +92,9 @@ export default function DoctorDashboard() {
 				</button>
 			</h1>
 
-			{/* Doctor Info */}
-			<div className="bg-white p-5 shadow-md rounded-2xl mb-8">
-				<h2 className="text-xl font-bold mb-2">Doctor Details</h2>
-				<div className="grid md:grid-cols-2 gap-3 text-gray-700">
-					<p>
-						<strong>Specialization:</strong> {doctor.specialization}
-					</p>
-					<p>
-						<strong>Department:</strong> {doctor.dept_name}
-					</p>
-					<p>
-						<strong>Phone:</strong> {doctor.phone_no}
-					</p>
-					<p>
-						<strong>Email:</strong> {doctor.email}
-					</p>
-				</div>
-			</div>
-
 			{/* Patients Table */}
 			<div className="bg-white p-5 shadow-md rounded-2xl">
-				<h2 className="text-xl font-bold mb-3">Assigned Patients</h2>
+				<h2 className="text-xl font-bold mb-3">My Patients</h2>
 
 				{patients.length === 0 ? (
 					<p className="text-gray-600">No patients assigned yet.</p>
@@ -97,148 +104,110 @@ export default function DoctorDashboard() {
 							<tr className="bg-gray-200 text-gray-700">
 								<th className="p-2">Name</th>
 								<th className="p-2">Gender</th>
-								<th className="p-2">Blood Group</th>
 								<th className="p-2">Contact</th>
+								<th className="p-2">Appointment Date</th>
+								<th className="p-2">Appointment Time</th>
 								<th className="p-2 text-center">Action</th>
 							</tr>
 						</thead>
 						<tbody>
-							{patients.map((p) => (
-								<tr
-									key={p.patient_id}
-									className="border-t hover:bg-gray-50"
-								>
-									<td className="p-2">{p.name}</td>
-									<td className="p-2">{p.gender}</td>
-									<td className="p-2">{p.blood_group}</td>
-									<td className="p-2">{p.contact_no}</td>
-									<td className="p-2 text-center">
-										<button
-											onClick={() =>
-												togglePatientDetails(
-													p.patient_id
-												)
-											}
-											className="text-blue-600 hover:underline font-medium"
-										>
-											View Details
-										</button>
-									</td>
-								</tr>
-							))}
+							{appointments.map((a) => {
+								const patient = patients.find(
+									(p) => p.patient_id === a.patient_id
+								);
+								if (!patient) return null;
+
+								return (
+									<tr
+										key={a.appoint_id}
+										className="border-t hover:bg-gray-50"
+									>
+										<td className="p-2">{patient.name}</td>
+										<td className="p-2">
+											{patient.gender}
+										</td>
+										<td className="p-2">
+											{patient.contact_no}
+										</td>
+										<td className="p-2">{a.date}</td>
+										<td className="p-2">{a.time}</td>
+										<td className="p-2 text-center">
+											<button
+												onClick={() =>
+													handleRequestTests(
+														patient,
+														a
+													)
+												}
+												className="text-blue-600 hover:underline font-medium"
+											>
+												Request Tests
+											</button>
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 				)}
 			</div>
 
-			{/* Expanded Patient Details */}
-			{selectedPatient && (
-				<div className="mt-8 bg-white shadow-md rounded-2xl p-6 border border-gray-200">
-					<h3 className="text-2xl font-semibold text-blue-700 mb-4">
-						Patient Details — {selectedPatient.name}
-					</h3>
+			{/* Test Request Modal */}
+			{modalOpen && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-2xl w-96">
+						<h3 className="text-xl font-semibold mb-4">
+							Request Tests for {selectedPatient.name}
+						</h3>
 
-					<div className="grid md:grid-cols-2 gap-3 text-gray-700 mb-6">
-						<p>
-							<strong>Email:</strong>{" "}
-							{selectedPatient.email || "N/A"}
-						</p>
-						<p>
-							<strong>Gender:</strong> {selectedPatient.gender}
-						</p>
-						<p>
-							<strong>Blood Group:</strong>{" "}
-							{selectedPatient.blood_group}
-						</p>
-						<p>
-							<strong>Contact:</strong>{" "}
-							{selectedPatient.contact_no}
-						</p>
-						<p>
-							<strong>Address:</strong> {selectedPatient.address}
-						</p>
-						<p>
-							<strong>DOB:</strong>{" "}
-							{selectedPatient.date_of_birth}
-						</p>
-					</div>
+						<div className="max-h-64 overflow-y-auto mb-4">
+							{availableTests.map((t) => (
+								<div key={t.test_code} className="mb-2">
+									<label className="flex items-center space-x-2">
+										<input
+											type="checkbox"
+											value={t.test_code}
+											checked={selectedTests.includes(
+												t.test_code
+											)}
+											onChange={(e) => {
+												const code = t.test_code;
+												if (e.target.checked) {
+													setSelectedTests((prev) => [
+														...prev,
+														code,
+													]);
+												} else {
+													setSelectedTests((prev) =>
+														prev.filter(
+															(x) => x !== code
+														)
+													);
+												}
+											}}
+										/>
+										<span>
+											{t.test_name} — {t.test_type}
+										</span>
+									</label>
+								</div>
+							))}
+						</div>
 
-					{/* Tests */}
-					<div className="mb-6">
-						<h4 className="text-lg font-semibold text-gray-800 mb-2">
-							Tests Taken
-						</h4>
-						{selectedPatient.tests?.length > 0 ? (
-							<table className="w-full border text-left rounded-lg">
-								<thead>
-									<tr className="bg-gray-100 text-gray-700">
-										<th className="p-2">Test Name</th>
-										<th className="p-2">Test Type</th>
-										<th className="p-2">Test Results</th>
-									</tr>
-								</thead>
-								<tbody>
-									{selectedPatient.tests.map((t, idx) => (
-										<tr
-											key={idx}
-											className="border-t hover:bg-gray-50"
-										>
-											<td className="p-2">
-												{t.test_name}
-											</td>
-											<td className="p-2">{t.test_type}</td>
-											<td className="p-2">{t.measured_value}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						) : (
-							<p className="text-gray-600">
-								No tests found for this patient.
-							</p>
-						)}
-					</div>
-
-					{/* Prescriptions */}
-					<div>
-						<h4 className="text-lg font-semibold text-gray-800 mb-2">
-							Prescriptions
-						</h4>
-						{selectedPatient.prescriptions?.length > 0 ? (
-							<table className="w-full border text-left rounded-lg">
-								<thead>
-									<tr className="bg-gray-100 text-gray-700">
-										<th className="p-2">Medicine</th>
-										<th className="p-2">Dosage</th>
-										<th className="p-2">Duration</th>
-									</tr>
-								</thead>
-								<tbody>
-									{selectedPatient.prescriptions.map(
-										(pr, idx) => (
-											<tr
-												key={idx}
-												className="border-t hover:bg-gray-50"
-											>
-												<td className="p-2">
-													{pr.medicine_name}
-												</td>
-												<td className="p-2">
-													{pr.dosage}
-												</td>
-												<td className="p-2">
-													{pr.duration}
-												</td>
-											</tr>
-										)
-									)}
-								</tbody>
-							</table>
-						) : (
-							<p className="text-gray-600">
-								No prescriptions available.
-							</p>
-						)}
+						<div className="flex justify-end space-x-2">
+							<button
+								onClick={() => setModalOpen(false)}
+								className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={submitTestRequest}
+								className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+							>
+								Request
+							</button>
+						</div>
 					</div>
 				</div>
 			)}

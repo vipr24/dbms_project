@@ -111,10 +111,8 @@ VALUES
 CREATE TABLE Test_History (
   test_history_id SERIAL PRIMARY KEY NOT NULL,
   test_code INT NOT NULL,
-  Tech_ID INT NOT NULL,
   Appoint_ID INT NOT NULL,
-  Test_Completion VARCHAR(25) DEFAULT 'NOT DONE' CHECK (Test_Completion IN ('NOT DONE', 'DONE'))
-  FOREIGN KEY (Tech_ID) REFERENCES Lab_Technician(Tech_ID),
+  Test_Completion VARCHAR(25) DEFAULT 'NOT DONE' CHECK (Test_Completion IN ('NOT DONE', 'DONE')),
   FOREIGN KEY (Appoint_ID) REFERENCES Appointment(Appoint_ID) ON DELETE CASCADE,
   FOREIGN KEY (test_code) REFERENCES Test(test_code) ON DELETE CASCADE ON UPDATE CASCADE
 );

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router";
 
 export default function LabTechDash() {
-	const [labTech, setLabTech] = useState(null);
 	const [pendingTests, setPendingTests] = useState([]);
 	const [completedTests, setCompletedTests] = useState([]);
 	const [selectedTest, setSelectedTest] = useState(null);
@@ -13,9 +11,8 @@ export default function LabTechDash() {
 	});
 
 	const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-	// const navigate = useNavigate();
 
-	// Fetch lab technician info and tests
+	// Fetch tests
 	useEffect(() => {
 		const token = localStorage.getItem("token");
 
@@ -24,7 +21,6 @@ export default function LabTechDash() {
 		})
 			.then((res) => res.json())
 			.then((data) => {
-				setLabTech(data.labTech);
 				setPendingTests(data.pendingTests || []);
 				setCompletedTests(data.completedTests || []);
 			})
@@ -33,7 +29,6 @@ export default function LabTechDash() {
 			);
 	}, []);
 
-	// Handle input changes in test result form
 	const handleChange = (e) => {
 		setTestResultData({
 			...testResultData,
@@ -41,7 +36,6 @@ export default function LabTechDash() {
 		});
 	};
 
-	// Submit test result
 	const handleSubmitResult = async (e) => {
 		e.preventDefault();
 		if (!selectedTest) return;
@@ -63,7 +57,6 @@ export default function LabTechDash() {
 			const data = await res.json();
 			if (res.ok) {
 				alert("Test result submitted successfully!");
-				// Remove submitted test from pending and add to completed
 				setPendingTests(
 					pendingTests.filter(
 						(t) =>
@@ -85,19 +78,10 @@ export default function LabTechDash() {
 		}
 	};
 
-	if (!labTech)
-		return (
-			<p className="text-center mt-10 text-gray-600">Please login...</p>
-		);
-
 	return (
 		<div className="p-8 bg-gray-50 min-h-screen flex flex-col md:flex-row gap-6">
-			{/* Main Section: Pending Tests */}
+			{/* Pending Tests */}
 			<div className="flex-1 bg-white p-5 shadow-md rounded-2xl">
-				<h1 className="text-2xl font-semibold text-blue-700 mb-4">
-					Welcome, {labTech.name}
-				</h1>
-
 				<h2 className="text-xl font-bold mb-3">Pending Lab Tests</h2>
 				{pendingTests.length === 0 ? (
 					<p className="text-gray-600">No pending tests.</p>
@@ -132,7 +116,7 @@ export default function LabTechDash() {
 					</table>
 				)}
 
-				{/* Test Result Popup */}
+				{/* Test Result Modal */}
 				{selectedTest && (
 					<div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
 						<div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-lg relative">
@@ -206,7 +190,7 @@ export default function LabTechDash() {
 				)}
 			</div>
 
-			{/* Sidebar: Completed Tests */}
+			{/* Completed Tests */}
 			<div className="w-80 bg-white p-5 shadow-md rounded-2xl">
 				<h2 className="text-xl font-bold mb-3">Completed Tests</h2>
 				{completedTests.length === 0 ? (

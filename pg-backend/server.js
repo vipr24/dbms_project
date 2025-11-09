@@ -42,8 +42,8 @@ app.get("/doctor", verifyToken, doctorFetch);
 app.post("/appointment/book", verifyToken, appointmentBook);
 app.post("/test/register", verifyToken, testRegister);
 
-app.get("/dashboard/:techId", getLabTechDashboard);
-app.post("/tests/:techId/:test_history_id/submit", submitTestResult);
+app.get("/lab-tech/dashboard", getLabTechDashboard);
+app.post("/lab-tech/tests/:techId/:test_history_id/submit", submitTestResult);
 
 // Fetch all doctors
 app.get("/doctors", async (req, res) => {
@@ -55,10 +55,109 @@ app.get("/doctors", async (req, res) => {
 
 // Fetch all available tests
 app.get("/tests", async (req, res) => {
-	const tests = await pool.query(
-		`SELECT test_code, test_name, test_type, normal_range FROM test;`
-	);
-	res.json(tests.rows);
+	try {
+		const result = await pool.query(
+			`SELECT test_code, test_name, test_type, normal_range FROM Test ORDER BY test_name`
+		);
+		res.json(result.rows);
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+app.post("/test/request", verifyToken, async (req, res) => {
+	const doctorId = req.user.doctor_id;
+	const { appointId, tests } = req.body;
+
+	if (!appointId || !tests || !Array.isArray(tests) || tests.length === 0) {
+		return res
+			.status(400)
+			.json({ error: "Appointment ID and tests are required" });
+	}
+
+	try {
+		// Check if appointment belongs to this doctor
+		const appointRes = await pool.query(
+			`SELECT doctor_id FROM Appointment WHERE appoint_id = $1`,
+			[appointId]
+		);
+
+		if (!appointRes.rows.length) {
+			return res.status(404).json({ error: "Appointment not found" });
+		}
+
+		if (appointRes.rows[0].doctor_id !== doctorId) {
+			return res
+				.status(403)
+				.json({ error: "You are not authorized for this appointment" });
+		}
+
+		// Insert selected tests into Test_History
+		const insertPromises = tests.map((testCode) =>
+			pool.query(
+				`INSERT INTO Test_History (test_code, appoint_id) VALUES ($1, $2)`,
+				[testCode, appointId]
+			)
+		);
+
+		await Promise.all(insertPromises);
+
+		res.json({ message: "Tests successfully assigned to patient" });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+// GET /doctor/dashboard
+app.get("/doctor/dashboard", verifyToken, async (req, res) => {
+	const doctorId = req.user.doctor_id;
+
+	try {
+		// Fetch doctor info with department name
+		const doctorRes = await pool.query(
+			`SELECT d.doctor_id, d.name, d.gender, d.phone_no, d.email, d.specialization, dep.dept_name
+       FROM Doctor d
+       LEFT JOIN Department dep ON d.dept_id = dep.dept_id
+       WHERE d.doctor_id = $1`,
+			[doctorId]
+		);
+
+		if (!doctorRes.rows.length) {
+			return res.status(404).json({ error: "Doctor not found" });
+		}
+
+		const doctor = doctorRes.rows[0];
+
+		// Fetch appointments of this doctor
+		const appointmentsRes = await pool.query(
+			`SELECT appoint_id, patient_id, date, time
+       FROM Appointment
+       WHERE doctor_id = $1
+       ORDER BY date, time`,
+			[doctorId]
+		);
+		const appointments = appointmentsRes.rows;
+
+		// Fetch unique patients for this doctor
+		const patientIds = [...new Set(appointments.map((a) => a.patient_id))];
+		let patients = [];
+		if (patientIds.length > 0) {
+			const patientsRes = await pool.query(
+				`SELECT patient_id, name, gender, contact_no, blood_group, email
+         FROM Patient
+         WHERE patient_id = ANY($1::int[])`,
+				[patientIds]
+			);
+			patients = patientsRes.rows;
+		}
+
+		res.json({ doctor, appointments, patients });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: "Server error" });
+	}
 });
 
 app.get("/doctor/patient/:patient_id", verifyToken, doctorPatientDetails);
