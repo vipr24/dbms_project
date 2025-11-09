@@ -43,7 +43,7 @@ app.post("/appointment/book", verifyToken, appointmentBook);
 app.post("/test/register", verifyToken, testRegister);
 
 app.get("/lab-tech/dashboard", getLabTechDashboard);
-app.post("/lab-tech/tests/:techId/:test_history_id/submit", submitTestResult);
+app.post("/lab-tech/tests/:test_history_id/submit", submitTestResult);
 
 // Fetch all doctors
 app.get("/doctors", async (req, res) => {
