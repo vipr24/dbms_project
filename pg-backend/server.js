@@ -162,6 +162,96 @@ app.get("/doctor/dashboard", verifyToken, async (req, res) => {
 
 app.get("/doctor/patient/:patient_id", verifyToken, doctorPatientDetails);
 
+app.get("/doctor/reports/:patientId", verifyToken, async (req, res) => {
+	const doctorId = req.user.doctor_id;
+	const { patientId } = req.params;
+
+	try {
+		// ✅ Get the latest report for this patient (or all reports if you want)
+		const reportRes = await pool.query(
+			`SELECT * FROM report 
+       WHERE patient_id = $1 
+       ORDER BY report_date DESC`,
+			[patientId]
+		);
+
+		if (reportRes.rows.length === 0) {
+			return res.status(404).json({ message: "No reports found" });
+		}
+
+		// You can send all reports or just the latest
+		const reports = reportRes.rows;
+
+		// ✅ For each report, get the test results
+		const reportIds = reports.map((r) => r.report_id);
+		const testsRes = await pool.query(
+			`SELECT tr.*, t.test_name, t.test_type, t.normal_range,
+                    lt.name AS technician_name
+             FROM test_result tr
+             JOIN test t ON tr.test_code = t.test_code
+             LEFT JOIN lab_technician lt ON tr.tech_id = lt.tech_id
+             WHERE tr.report_id = ANY($1::int[])`,
+			[reportIds]
+		);
+
+		// ✅ Group test results by report
+		const reportsWithTests = reports.map((r) => ({
+			...r,
+			tests: testsRes.rows.filter((t) => t.report_id === r.report_id),
+		}));
+
+		res.json({
+			reports: reportsWithTests,
+		});
+	} catch (err) {
+		console.error("Error fetching patient report:", err);
+		res.status(500).json({ message: "Server error fetching report" });
+	}
+});
+
+// Approve or reject report
+app.post("/doctor/report/:reportId/review", verifyToken, async (req, res) => {
+	const doctorId = req.user.doctor_id;
+	const { reportId } = req.params;
+	const { approval_status, notes } = req.body; // 'Approved' or 'Rejected'
+
+	if (!["Approved", "Rejected"].includes(approval_status)) {
+		return res.status(400).json({ message: "Invalid approval status" });
+	}
+
+	try {
+		// ✅ Update report approval status
+		await pool.query(
+			"UPDATE report SET approval_status = $1 WHERE report_id = $2",
+			[approval_status, reportId]
+		);
+
+		// ✅ Find patient_id from report
+		const reportRes = await pool.query(
+			"SELECT patient_id FROM report WHERE report_id = $1",
+			[reportId]
+		);
+		if (reportRes.rows.length === 0)
+			return res.status(404).json({ message: "Report not found" });
+
+		const { patient_id } = reportRes.rows[0];
+
+		// ✅ Insert prescription note
+		await pool.query(
+			`INSERT INTO provide_prescription (notes, patient_id, doctor_id)
+         VALUES ($1, $2, $3)`,
+			[notes || null, patient_id, doctorId]
+		);
+
+		res.json({
+			message: `Report ${approval_status} and prescription saved.`,
+		});
+	} catch (err) {
+		console.error("Error updating report status:", err);
+		res.status(500).json({ message: "Error updating report" });
+	}
+});
+
 await pool
 	.connect()
 	.then(() => console.log("Database connected"))

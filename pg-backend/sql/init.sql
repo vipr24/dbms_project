@@ -123,7 +123,11 @@ CREATE TABLE report (
   report_date DATE DEFAULT CURRENT_DATE,
   approval_status VARCHAR(20) DEFAULT 'Pending' CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')),
   patient_id INT NOT NULL,
+  Appoint_ID INT,
   FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (Appoint_ID) REFERENCES Appointment(Appoint_ID)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
