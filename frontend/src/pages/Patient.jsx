@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 export default function Patient() {
 	const navigate = useNavigate();
@@ -17,6 +18,10 @@ export default function Patient() {
 		email: "",
 		password: "",
 	});
+
+	useEffect(() => {
+		toast("Welcome Patient");
+	}, []);
 
 	const handleChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });

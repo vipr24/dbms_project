@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
 
 export default function App() {
@@ -8,6 +10,10 @@ export default function App() {
 		else if (role == "lab_technician") navigate("/lab_technician");
 		else navigate("/doctor");
 	};
+
+	useEffect(() => {
+		toast("DBMS Project");
+	}, []);
 
 	return (
 		<div className="flex flex-col items-center justify-center h-screen bg-gray-100">
