@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function LabTechDash() {
+	const navigate = useNavigate();
 	const [pendingTests, setPendingTests] = useState([]);
 	const [completedTests, setCompletedTests] = useState([]);
 	const [selectedTest, setSelectedTest] = useState(null);
@@ -191,7 +193,16 @@ export default function LabTechDash() {
 			</div>
 
 			{/* Completed Tests */}
-			<div className="w-80 bg-white p-5 shadow-md rounded-2xl">
+			<div className="w-80 bg-white p-5 shadow-md rounded-2xl flex flex-col gap-10">
+				<button
+					onClick={() => {
+						localStorage.removeItem("token");
+						navigate("/");
+					}}
+					className="p-2 bg-red-500 text-xl text-red-300 rounded"
+				>
+					Logout
+				</button>
 				<h2 className="text-xl font-bold mb-3">Completed Tests</h2>
 				{completedTests.length === 0 ? (
 					<p className="text-gray-600">No completed tests yet.</p>
