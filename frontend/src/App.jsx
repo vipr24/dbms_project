@@ -5,6 +5,7 @@ export default function App() {
 
 	const handleSelection = (role) => {
 		if (role === "patient") navigate("/patient");
+		else if (role == "lab_technician") navigate("/lab_technician");
 		else navigate("/doctor");
 	};
 
@@ -23,6 +24,12 @@ export default function App() {
 					className="px-6 py-3 bg-green-600 text-white rounded-2xl shadow-md hover:bg-green-700 transition"
 				>
 					Patient
+				</button>
+				<button
+					onClick={() => handleSelection("lab_technician")}
+					className="px-6 py-3 bg-green-600 text-white rounded-2xl shadow-md hover:bg-green-700 transition"
+				>
+					Lab Technician
 				</button>
 			</div>
 		</div>

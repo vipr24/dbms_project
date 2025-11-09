@@ -4,9 +4,9 @@ import { useNavigate } from "react-router";
 export default function PatientDashboard() {
 	const [patient, setPatient] = useState(null);
 	const [appointments, setAppointments] = useState([]);
-	const [tests, setTests] = useState([]);
 	const [doctors, setDoctors] = useState([]);
-	const [availableTests, setAvailableTests] = useState([]);
+	// const [availableTests, setAvailableTests] = useState([]);
+	// const [tests, setTests] = useState([]);
 
 	const [appointmentForm, setAppointmentForm] = useState({
 		doctorId: "",
@@ -14,12 +14,32 @@ export default function PatientDashboard() {
 		time: "",
 	});
 
-	const [testForm, setTestForm] = useState({
-		testCode: "",
-	});
+	// const [testForm, setTestForm] = useState({
+	// 	testCode: "",
+	// });
 
 	const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 	const navigate = useNavigate();
+
+	// Generate times from 10:00 to 17:00 with 30-min gap
+	const generateTimeSlots = () => {
+		const slots = [];
+		let hour = 10;
+		let minute = 0;
+		while (hour < 17 || (hour === 17 && minute === 0)) {
+			const h = hour.toString().padStart(2, "0");
+			const m = minute.toString().padStart(2, "0");
+			slots.push(`${h}:${m}`);
+			minute += 30;
+			if (minute === 60) {
+				minute = 0;
+				hour += 1;
+			}
+		}
+		return slots;
+	};
+
+	const timeSlots = generateTimeSlots();
 
 	useEffect(() => {
 		const token = localStorage.getItem("token");
@@ -33,7 +53,7 @@ export default function PatientDashboard() {
 			.then((data) => {
 				setPatient(data.patient);
 				setAppointments(data.appointments || []);
-				setTests(data.tests || []);
+				// setTests(data.tests || []);
 			});
 
 		// Fetch available doctors
@@ -42,9 +62,9 @@ export default function PatientDashboard() {
 			.then((data) => setDoctors(data));
 
 		// Fetch available test types
-		fetch(`${BACKEND_URL}/tests`)
-			.then((res) => res.json())
-			.then((data) => setAvailableTests(data));
+		// fetch(`${BACKEND_URL}/tests`)
+		// 	.then((res) => res.json())
+		// 	.then((data) => setAvailableTests(data));
 	}, []);
 
 	//Handlers
@@ -52,42 +72,56 @@ export default function PatientDashboard() {
 		e.preventDefault();
 		const token = localStorage.getItem("token");
 
+		if (!patient) return;
+
+		const patientId = patient.patient_id;
+
 		const res = await fetch(`${BACKEND_URL}/appointment/book`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${token}`,
 			},
-			body: JSON.stringify(appointmentForm),
-		});
-
-		const data = await res.json();
-		alert(data.message || data.error);
-	};
-
-	const handleTestSubmit = async (e) => {
-		e.preventDefault();
-		const token = localStorage.getItem("token");
-		const selectedTest = availableTests.find(
-			(t) => t.test_code === parseInt(testForm.testCode)
-		);
-
-		const res = await fetch(`${BACKEND_URL}/test/register`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${token}`,
-			},
 			body: JSON.stringify({
-				testName: selectedTest.test_name,
-				testType: selectedTest.test_type,
-				normalRange: selectedTest.normal_range,
+				patientId,
+				doctorId: appointmentForm.doctorId,
+				date: appointmentForm.date,
+				time: appointmentForm.time,
 			}),
 		});
 
 		const data = await res.json();
 		alert(data.message || data.error);
+
+		// Optionally refresh appointments
+		if (res.ok && data.appointment) {
+			setAppointments((prev) => [...prev, data.appointment]);
+		}
 	};
+
+	// const handleTestSubmit = async (e) => {
+	// 	e.preventDefault();
+	// 	const token = localStorage.getItem("token");
+	// 	const selectedTest = availableTests.find(
+	// 		(t) => t.test_code === parseInt(testForm.testCode)
+	// 	);
+
+	// 	const res = await fetch(`${BACKEND_URL}/test/register`, {
+	// 		method: "POST",
+	// 		headers: {
+	// 			"Content-Type": "application/json",
+	// 			Authorization: `Bearer ${token}`,
+	// 		},
+	// 		body: JSON.stringify({
+	// 			testName: selectedTest.test_name,
+	// 			testType: selectedTest.test_type,
+	// 			normalRange: selectedTest.normal_range,
+	// 		}),
+	// 	});
+
+	// 	const data = await res.json();
+	// 	alert(data.message || data.error);
+	// };
 
 	if (!patient)
 		return (
@@ -96,7 +130,7 @@ export default function PatientDashboard() {
 
 	return (
 		<div className="p-8 bg-gray-50 min-h-screen">
-			<h1 className="text-3xl font-bold mb-6 text-center text-blue-700 w-[96vw] flex justify-between">
+			<h1 className="text-3xl font-bold mb-6 text-blue-700 w-[96vw] flex justify-between">
 				Patient Dashboard
 				<button
 					onClick={() => {
@@ -110,25 +144,23 @@ export default function PatientDashboard() {
 			</h1>
 
 			{/* Patient Info */}
-			{patient && (
-				<div className="bg-white shadow-lg rounded-2xl p-6 mb-6">
-					<h2 className="text-xl font-semibold mb-4 text-gray-700">
-						My Details
-					</h2>
-					<p>
-						<b>Name:</b> {patient.name}
-					</p>
-					<p>
-						<b>Gender:</b> {patient.gender}
-					</p>
-					<p>
-						<b>Phone:</b> {patient.contact_no}
-					</p>
-					<p>
-						<b>Email:</b> {patient.email}
-					</p>
-				</div>
-			)}
+			<div className="bg-white shadow-lg rounded-2xl p-6 mb-6">
+				<h2 className="text-xl font-semibold mb-4 text-gray-700">
+					My Details
+				</h2>
+				<p>
+					<b>Name:</b> {patient.name}
+				</p>
+				<p>
+					<b>Gender:</b> {patient.gender}
+				</p>
+				<p>
+					<b>Phone:</b> {patient.contact_no}
+				</p>
+				<p>
+					<b>Email:</b> {patient.email}
+				</p>
+			</div>
 
 			{/* Appointments */}
 			<div className="bg-white shadow-lg rounded-2xl p-6 mb-6">
@@ -139,47 +171,13 @@ export default function PatientDashboard() {
 					<ul className="list-disc pl-5">
 						{appointments.map((a) => (
 							<li key={a.appoint_id}>
-								{a.date} at {a.time}
+								{a.date} at {a.time} with Doctor ID:{" "}
+								{a.doctor_id}
 							</li>
 						))}
 					</ul>
 				) : (
 					<p className="text-gray-500">No appointments yet.</p>
-				)}
-			</div>
-
-			{/* Tests */}
-			<div className="bg-white shadow-lg rounded-2xl p-6 mb-6">
-				<h2 className="text-xl font-semibold mb-4 text-gray-700">
-					My Tests
-				</h2>
-				{tests.length > 0 ? (
-					<table className="w-full border">
-						<thead>
-							<tr className="bg-blue-100">
-								<th className="p-2 border">Test Name</th>
-								<th className="p-2 border">Result</th>
-								<th className="p-2 border">Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							{tests.map((t) => (
-								<tr key={t.test_code}>
-									<td className="p-2 border">
-										{t.test_name}
-									</td>
-									<td className="p-2 border">
-										{t.measured_value || "—"}
-									</td>
-									<td className="p-2 border">
-										{t.interpretation_flag}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				) : (
-					<p className="text-gray-500">No test history available.</p>
 				)}
 			</div>
 
@@ -212,6 +210,7 @@ export default function PatientDashboard() {
 							))}
 						</select>
 					</div>
+
 					<div>
 						<label className="block font-medium mb-1">Date:</label>
 						<input
@@ -227,10 +226,10 @@ export default function PatientDashboard() {
 							required
 						/>
 					</div>
+
 					<div>
 						<label className="block font-medium mb-1">Time:</label>
-						<input
-							type="time"
+						<select
 							className="border rounded p-2 w-full"
 							value={appointmentForm.time}
 							onChange={(e) =>
@@ -240,8 +239,16 @@ export default function PatientDashboard() {
 								})
 							}
 							required
-						/>
+						>
+							<option value="">Select Time</option>
+							{timeSlots.map((t) => (
+								<option key={t} value={t}>
+									{t}
+								</option>
+							))}
+						</select>
 					</div>
+
 					<button
 						type="submit"
 						className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl"
@@ -251,7 +258,7 @@ export default function PatientDashboard() {
 				</form>
 			</div>
 
-			{/* --- Request Test Form --- */}
+			{/* --- Request Test Form ---
 			<div className="bg-white shadow-lg rounded-2xl p-6">
 				<h2 className="text-xl font-semibold mb-4 text-gray-700">
 					Request a Test
@@ -288,7 +295,7 @@ export default function PatientDashboard() {
 						Request Test
 					</button>
 				</form>
-			</div>
+			</div> */}
 		</div>
 	);
 }
