@@ -4,8 +4,8 @@ import { useNavigate } from "react-router";
 export default function Patient() {
 	const navigate = useNavigate();
 	const [isRegistered, setIsRegistered] = useState(null);
-	const [email, setEmail] = useState();
-	const [password, setPassword] = useState();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [formData, setFormData] = useState({
 		name: "",
 		gender: "",
