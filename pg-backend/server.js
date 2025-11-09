@@ -252,6 +252,35 @@ app.post("/doctor/report/:reportId/review", verifyToken, async (req, res) => {
 	}
 });
 
+app.get("/patient/prescriptions/:patientId", async (req, res) => {
+	const { patientId } = req.params;
+
+	try {
+		const result = await pool.query(
+			`SELECT 
+     pp.prescription_id,
+     pp.prescription_date,
+     pp.notes,
+     d.name AS doctor_name,
+     d.specialization
+   FROM provide_prescription pp
+   JOIN doctor d ON pp.doctor_id = d.doctor_id
+   WHERE pp.patient_id = $1
+   ORDER BY pp.prescription_date DESC`,
+			[patientId]
+		);
+
+		if (result.rows.length === 0) {
+			console.log(`No prescriptions found for patient_id: ${patientId}`);
+		}
+		
+		res.status(200).json(result.rows);
+	} catch (err) {
+		console.error("Error fetching prescriptions:", err);
+		res.status(500).json({ error: "Error fetching prescriptions" });
+	}
+});
+
 await pool
 	.connect()
 	.then(() => console.log("Database connected"))

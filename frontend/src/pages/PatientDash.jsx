@@ -5,8 +5,8 @@ export default function PatientDashboard() {
 	const [patient, setPatient] = useState(null);
 	const [appointments, setAppointments] = useState([]);
 	const [doctors, setDoctors] = useState([]);
-	// const [availableTests, setAvailableTests] = useState([]);
-	// const [tests, setTests] = useState([]);
+	const [modalOpen, setModalOpen] = useState(false);
+	const [prescriptions, setPrescriptions] = useState([]);
 
 	const [appointmentForm, setAppointmentForm] = useState({
 		doctorId: "",
@@ -14,14 +14,10 @@ export default function PatientDashboard() {
 		time: "",
 	});
 
-	// const [testForm, setTestForm] = useState({
-	// 	testCode: "",
-	// });
-
 	const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 	const navigate = useNavigate();
 
-	// Generate times from 10:00 to 17:00 with 30-min gap
+	// Generate time slots (10:00–17:00, 30-min gap)
 	const generateTimeSlots = () => {
 		const slots = [];
 		let hour = 10;
@@ -45,7 +41,7 @@ export default function PatientDashboard() {
 		const token = localStorage.getItem("token");
 		if (!token) return;
 
-		// Fetch patient personal data + their appointments/tests
+		// Fetch patient data and appointments
 		fetch(`${BACKEND_URL}/patient`, {
 			headers: { Authorization: `Bearer ${token}` },
 		})
@@ -53,25 +49,40 @@ export default function PatientDashboard() {
 			.then((data) => {
 				setPatient(data.patient);
 				setAppointments(data.appointments || []);
-				// setTests(data.tests || []);
 			});
 
-		// Fetch available doctors
+		// Fetch doctors
 		fetch(`${BACKEND_URL}/doctors`)
 			.then((res) => res.json())
 			.then((data) => setDoctors(data));
-
-		// Fetch available test types
-		// fetch(`${BACKEND_URL}/tests`)
-		// 	.then((res) => res.json())
-		// 	.then((data) => setAvailableTests(data));
 	}, []);
 
-	//Handlers
+	// Fetch prescriptions when modal opens
+	const fetchPrescriptions = async () => {
+		if (!patient) return;
+		const token = localStorage.getItem("token");
+		try {
+			const res = await fetch(
+				`${BACKEND_URL}/patient/prescriptions/${patient.patient_id}`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
+			const data = await res.json();
+			setPrescriptions(data || []);
+		} catch (err) {
+			console.error("Error fetching prescriptions:", err);
+		}
+	};
+
+	const handlePrescription = async () => {
+		setModalOpen(true);
+		await fetchPrescriptions();
+	};
+
 	const handleAppointmentSubmit = async (e) => {
 		e.preventDefault();
 		const token = localStorage.getItem("token");
-
 		if (!patient) return;
 
 		const patientId = patient.patient_id;
@@ -93,35 +104,10 @@ export default function PatientDashboard() {
 		const data = await res.json();
 		alert(data.message || data.error);
 
-		// Optionally refresh appointments
 		if (res.ok && data.appointment) {
 			setAppointments((prev) => [...prev, data.appointment]);
 		}
 	};
-
-	// const handleTestSubmit = async (e) => {
-	// 	e.preventDefault();
-	// 	const token = localStorage.getItem("token");
-	// 	const selectedTest = availableTests.find(
-	// 		(t) => t.test_code === parseInt(testForm.testCode)
-	// 	);
-
-	// 	const res = await fetch(`${BACKEND_URL}/test/register`, {
-	// 		method: "POST",
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 			Authorization: `Bearer ${token}`,
-	// 		},
-	// 		body: JSON.stringify({
-	// 			testName: selectedTest.test_name,
-	// 			testType: selectedTest.test_type,
-	// 			normalRange: selectedTest.normal_range,
-	// 		}),
-	// 	});
-
-	// 	const data = await res.json();
-	// 	alert(data.message || data.error);
-	// };
 
 	if (!patient)
 		return (
@@ -168,20 +154,25 @@ export default function PatientDashboard() {
 					My Appointments
 				</h2>
 				{appointments.length > 0 ? (
-					<ul className="list-disc pl-5">
+					<ul className="list-disc pl-5 flex w-[85vw] justify-between">
 						{appointments.map((a) => (
 							<li key={a.appoint_id}>
 								{a.date} at {a.time} with Doctor ID:{" "}
 								{a.doctor_id}
 							</li>
 						))}
+						<p className="bg-blue-500 text-white p-2 hover:bg-blue-400">
+							<button onClick={handlePrescription}>
+								View Prescription
+							</button>
+						</p>
 					</ul>
 				) : (
 					<p className="text-gray-500">No appointments yet.</p>
 				)}
 			</div>
 
-			{/* --- Book Appointment Form --- */}
+			{/* Book Appointment */}
 			<div className="bg-white shadow-lg rounded-2xl p-6 mb-6">
 				<h2 className="text-xl font-semibold mb-4 text-gray-700">
 					Book Appointment
@@ -258,44 +249,48 @@ export default function PatientDashboard() {
 				</form>
 			</div>
 
-			{/* --- Request Test Form ---
-			<div className="bg-white shadow-lg rounded-2xl p-6">
-				<h2 className="text-xl font-semibold mb-4 text-gray-700">
-					Request a Test
-				</h2>
-				<form onSubmit={handleTestSubmit} className="space-y-4">
-					<div>
-						<label className="block font-medium mb-1">
-							Select Test:
-						</label>
-						<select
-							className="border rounded p-2 w-full"
-							value={testForm.testCode}
-							onChange={(e) =>
-								setTestForm({
-									...testForm,
-									testCode: e.target.value,
-								})
-							}
-							required
-						>
-							<option value="">Select Test</option>
-							{availableTests.map((t) => (
-								<option key={t.test_code} value={t.test_code}>
-									{t.test_name} — {t.test_type}
-								</option>
-							))}
-						</select>
-					</div>
+			{/* Prescription Modal */}
+			{modalOpen && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white rounded-2xl p-6 w-[500px] max-h-[80vh] overflow-y-auto">
+						<h3 className="text-xl font-semibold mb-4 text-gray-700">
+							My Prescriptions
+						</h3>
 
-					<button
-						type="submit"
-						className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl"
-					>
-						Request Test
-					</button>
-				</form>
-			</div> */}
+						{prescriptions.length === 0 ? (
+							<p className="text-gray-600">
+								No prescriptions available yet.
+							</p>
+						) : (
+							prescriptions.map((p) => (
+								<div
+									key={p.prescription_id}
+									className="border rounded-lg p-4 mb-4 bg-gray-50"
+								>
+									<p>
+										<b>Doctor:</b> {p.doctor_name}
+									</p>
+									<p>
+										<b>Date:</b> {p.date}
+									</p>
+									<p className="mt-2">
+										<b>Notes:</b> {p.notes}
+									</p>
+								</div>
+							))
+						)}
+
+						<div className="flex justify-end">
+							<button
+								onClick={() => setModalOpen(false)}
+								className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
