@@ -57,7 +57,7 @@ export const loginPatient = async (req, res) => {
 			"SELECT * FROM Patient WHERE Email = $1",
 			[email]
 		);
-		if (userRes.length === 0)
+		if (userRes.rows.length === 0)
 			return res.status(401).json({ message: "Invalid credentials" });
 
 		const user = userRes.rows[0];
