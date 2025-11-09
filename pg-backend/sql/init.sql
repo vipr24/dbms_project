@@ -65,7 +65,7 @@ CREATE TABLE Doctor (
 CREATE TABLE Lab_Technician (
   Tech_ID     SERIAL PRIMARY KEY,
   Name        VARCHAR(50) NOT NULL,
-  Contact_No  VARCHAR(15) NOT NULL,
+  Contact_No  VARCHAR(15) UNIQUE NOT NULL,
   Password    TEXT NOT NULL
 );
 
