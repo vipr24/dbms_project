@@ -12,7 +12,7 @@ export default function Patient() {
 		gender: "",
 		phone: "",
 		bloodGroup: "",
-		dateOfRegistration: "",
+		// dateOfRegistration: "",
 		address: "",
 		dob: "",
 		email: "",
@@ -122,7 +122,7 @@ export default function Patient() {
 								<input
 									name={key}
 									value={value}
-									onChange={handleChange}
+									onChange={			handleChange}
 									type={
 										key.includes("date") ? "date" : "text"
 									}
