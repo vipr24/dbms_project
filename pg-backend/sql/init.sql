@@ -51,7 +51,7 @@ CREATE TABLE Patient(
 CREATE TABLE Doctor (
   Doctor_ID      SERIAL PRIMARY KEY,
   Name           VARCHAR(50) NOT NULL,
-  Gender         CHAR(1),
+  Gender            VARCHAR(20) CHECK (Gender IN ('Male', 'Female', 'Other')),
   Phone_No       VARCHAR(15),
   Email          VARCHAR(100) UNIQUE NOT NULL,
   License_Number VARCHAR(30) NOT NULL,

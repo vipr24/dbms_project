@@ -206,8 +206,14 @@ export default function DoctorDashboard() {
 										<td className="p-2">
 											{patient.contact_no}
 										</td>
-										<td className="p-2">{a.date}</td>
-										<td className="p-2">{a.time}</td>
+										<td className="p-2">
+											{new Date(
+												a.date
+											).toLocaleDateString()}
+										</td>
+										<td className="p-2">
+											{a.time.slice(0, 5)}
+										</td>
 										<td className="p-2 text-center space-x-3">
 											<button
 												onClick={() =>

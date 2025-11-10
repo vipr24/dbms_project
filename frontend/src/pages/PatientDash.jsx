@@ -157,7 +157,8 @@ export default function PatientDashboard() {
 					<ul className="list-disc pl-5 flex w-[85vw] justify-between">
 						{appointments.map((a) => (
 							<li key={a.appoint_id}>
-								{a.date} at {a.time} with Doctor ID:{" "}
+								{new Date(a.date).toLocaleDateString()} at{" "}
+								{a.time.slice(0, 5)} with Doctor ID:{" "}
 								{a.doctor_id}
 							</li>
 						))}
@@ -271,7 +272,10 @@ export default function PatientDashboard() {
 										<b>Doctor:</b> {p.doctor_name}
 									</p>
 									<p>
-										<b>Date:</b> {p.date}
+										<b>Date:</b>{" "}
+										{new Date(
+											p.prescription_date
+										).toLocaleDateString()}
 									</p>
 									<p className="mt-2">
 										<b>Notes:</b> {p.notes}
