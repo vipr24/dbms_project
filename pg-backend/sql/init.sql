@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS Contains CASCADE;
 DROP TABLE IF EXISTS Provide_Prescription CASCADE;
 DROP TABLE IF EXISTS Patient_History CASCADE;
-DROP TABLE IF EXISTS Billing_Record CASCADE;
 DROP TABLE IF EXISTS Report CASCADE;
 DROP TABLE IF EXISTS Test_Result CASCADE;
 DROP TABLE IF EXISTS Test_History CASCADE;
@@ -107,7 +106,7 @@ VALUES
   ('Calcium Test', '8.5–10.2 mg/dL', 'Blood Test'),
   ('COVID-19 RT-PCR', 'Negative', 'Microbiology Test');
 
-
+-- 7. Test History
 CREATE TABLE Test_History (
   test_history_id SERIAL PRIMARY KEY NOT NULL,
   test_code INT NOT NULL,
@@ -117,7 +116,7 @@ CREATE TABLE Test_History (
   FOREIGN KEY (test_code) REFERENCES Test(test_code) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- 7. Report
+-- 8. Report
 CREATE TABLE report (
   report_id SERIAL PRIMARY KEY,
   report_date DATE DEFAULT CURRENT_DATE,
@@ -132,17 +131,6 @@ CREATE TABLE report (
     ON UPDATE CASCADE
 );
 
--- 8. Billing record
-CREATE TABLE billing_record (
-  bill_no SERIAL PRIMARY KEY,
-  total_amt DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  payment_status VARCHAR(20) DEFAULT 'Pending' CHECK (payment_status IN ('Paid', 'Unpaid', 'Pending')),
-  payment_method VARCHAR(20) DEFAULT 'Cash' CHECK (payment_method IN ('Cash', 'Card', 'Online', 'Other')),
-  report_id INT UNIQUE,
-  FOREIGN KEY (report_id) REFERENCES report(report_id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-);
 
 -- 9. Patient History
 CREATE TABLE Patient_History (
